@@ -10,7 +10,7 @@ class PostController extends Controller
 {
     public function index($id)
     {
-        $comments = PostComment::where('post_id',$id)->where('post_comment_id',null)->with(['childs'])->get();
+        $comments = PostComment::where('post_id',$id)->where('post_comment_id',null)->orderBy('created_at', 'desc')->with(['childs'])->get();
         return view('post' , compact('comments'));
     }
 }

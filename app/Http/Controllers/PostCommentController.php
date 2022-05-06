@@ -19,12 +19,12 @@ class PostCommentController extends Controller
             'user_name'=>'required|max:100',
             'comment' => 'required',
         ]);
-        $comment = PostComment::create([
+        PostComment::create([
             'user_name' => $request->user_name,
             'comment' =>  $request->comment,
             'post_comment_id' => ($request->post_comment_id) ? $request->post_comment_id : null
         ]);
-
-        return response()->json($comment);
+        $comments = PostComment::where('post_id',$request->post_id)->where('post_comment_id',null)->orderBy('created_at', 'desc')->with(['childs'])->get();
+        return response()->json($comments);
     }
 }

@@ -5328,13 +5328,10 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  props: {
-    comment_list: Array
-  },
+  props: ['post_comments'],
   components: {
     Modal: _ReplyModal_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
@@ -5344,7 +5341,8 @@ __webpack_require__.r(__webpack_exports__);
       reply_to: '',
       reply_to_id: null,
       user_name: '',
-      comment: ''
+      comment: '',
+      comment_list: this.post_comments
     };
   },
   methods: {
@@ -5354,7 +5352,26 @@ __webpack_require__.r(__webpack_exports__);
       this.reply_to_id = comment_id;
     },
     sendComment: function sendComment() {
+      var _this = this;
+
+      var reply_to_id = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
       if (this.user_name == '' || this.comment == '') return false;
+      axios__WEBPACK_IMPORTED_MODULE_0___default().post('/post/comment', {
+        post_id: 1,
+        user_name: this.user_name,
+        comment: this.comment,
+        post_comment_id: reply_to_id
+      }).then(function (response) {
+        _this.comment_list = response.data;
+        _this.user_name = '';
+        _this.comment = '';
+      })["catch"](function (error) {
+        return console.log(error);
+      });
+    },
+    refreshList: function refreshList(newlist) {
+      this.comment_list = newlist;
+      this.showModal = false;
     }
   }
 });
@@ -5411,17 +5428,32 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var body_parser__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(body_parser__WEBPACK_IMPORTED_MODULE_0__);
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  props: {
-    show: Boolean,
-    reply_to: String,
-    reply_to_id: Number
+  props: ['show', 'reply_to', 'reply_to_id'],
+  data: function data() {
+    return {
+      reply_user_name: '',
+      reply_comment: ''
+    };
   },
   methods: {
-    show_Modal: function show_Modal(comment_id, user_name) {
-      this.showModal = true;
-      this.reply_to = user_name;
-      this.reply_to_id = comment_id;
-      $emit('close');
+    sendComment: function sendComment() {
+      var _this = this;
+
+      var reply_to_id = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+      if (this.reply_user_name == '' || this.reply_comment == '') return false;
+      axios.post('/post/comment', {
+        post_id: 1,
+        user_name: this.reply_user_name,
+        comment: this.reply_comment,
+        post_comment_id: reply_to_id
+      }).then(function (response) {
+        _this.$emit('addreply', response.data);
+
+        _this.reply_user_name = '';
+        _this.reply_comment = '';
+      })["catch"](function (error) {
+        return console.log(error);
+      });
     }
   }
 });
@@ -41212,6 +41244,7 @@ var render = function () {
               reply_to: _vm.reply_to,
             },
             on: {
+              addreply: _vm.refreshList,
               close: function ($event) {
                 _vm.showModal = false
               },
@@ -41581,11 +41614,28 @@ var render = function () {
                           ]),
                           _vm._v(" "),
                           _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.reply_user_name,
+                                expression: "reply_user_name",
+                              },
+                            ],
                             staticClass: "form-control",
                             attrs: {
                               type: "text",
                               id: "user_name",
                               placeholder: "Enter Your Name",
+                            },
+                            domProps: { value: _vm.reply_user_name },
+                            on: {
+                              input: function ($event) {
+                                if ($event.target.composing) {
+                                  return
+                                }
+                                _vm.reply_user_name = $event.target.value
+                              },
                             },
                           }),
                         ]),
@@ -41596,11 +41646,28 @@ var render = function () {
                           ]),
                           _vm._v(" "),
                           _c("textarea", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.reply_comment,
+                                expression: "reply_comment",
+                              },
+                            ],
                             staticClass: "form-control",
                             attrs: {
                               type: "password",
                               id: "comment",
                               placeholder: "Enter your comments...",
+                            },
+                            domProps: { value: _vm.reply_comment },
+                            on: {
+                              input: function ($event) {
+                                if ($event.target.composing) {
+                                  return
+                                }
+                                _vm.reply_comment = $event.target.value
+                              },
                             },
                           }),
                         ]),
@@ -41630,7 +41697,7 @@ var render = function () {
                             attrs: { type: "button", value: "Send" },
                             on: {
                               click: function ($event) {
-                                return _vm.$emit("close")
+                                return _vm.sendComment(_vm.reply_to_id)
                               },
                             },
                           }),

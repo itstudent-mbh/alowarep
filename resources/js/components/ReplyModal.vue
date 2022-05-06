@@ -2,17 +2,24 @@
 import { text } from "body-parser";
 
 export default {
-  props: {
-    show: Boolean,
-    reply_to: String,
-    reply_to_id: Number
-  },
-  methods:{
-        show_Modal(comment_id,user_name) {
-            this.showModal = true;
-            this.reply_to = user_name;
-            this.reply_to_id = comment_id;
-            $emit('close');
+    props: ['show','reply_to','reply_to_id'],
+    data() {
+        return {
+        reply_user_name: '',
+        reply_comment: ''
+        }
+    },
+    methods:{
+        sendComment(reply_to_id = null){
+            if(this.reply_user_name == '' || this.reply_comment == '') return false;
+            axios.post('/post/comment',{
+                post_id : 1 ,
+                user_name: this.reply_user_name,
+                comment: this.reply_comment,
+                post_comment_id: reply_to_id
+            })
+            .then((response) => {this.$emit('addreply',response.data); this.reply_user_name=''; this.reply_comment=''})
+            .catch((error) => console.log(error));
         }
     }
 }
@@ -29,16 +36,16 @@ export default {
                 <form>
                     <div class="form-group">
                         <label for="user_name">Your Name</label>
-                        <input type="text" class="form-control" id="user_name" placeholder="Enter Your Name">
+                        <input type="text" class="form-control" id="user_name" placeholder="Enter Your Name" v-model="reply_user_name">
                     </div>
                     <div class="form-group">
                         <label for="comment">Comment</label>
-                        <textarea type="password" class="form-control" id="comment" placeholder="Enter your comments..."></textarea>
+                        <textarea type="password" class="form-control" id="comment" placeholder="Enter your comments..." v-model="reply_comment" ></textarea>
                     </div>
                     <input type="hidden" class="form-control" id="post_comment_id" :value="reply_to_id" >
                     <div class="form-group">
                         <input style="margin:10px" type="button"  class="btn btn-secondary modal-default-button"  @click="$emit('close')" value="Cancel">
-                        <input style="margin:10px" type="button"  class="btn btn-primary modal-default-button"  @click="$emit('close')" value="Send">
+                        <input style="margin:10px" type="button"  class="btn btn-primary modal-default-button"  @click="sendComment(reply_to_id)" value="Send">
                     </div>
                 </form>
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PostCommentController;
 use App\Http\Controllers\PostController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,4 +17,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::controller(PostController::class)->group(function () {
     Route::get('/post/{id}','index')->name('post');
+});
+
+
+Route::controller(PostCommentController::class)->group(function () {
+    Route::post('/post/comment','create')->name('post');
 });

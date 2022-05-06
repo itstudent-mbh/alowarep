@@ -50,7 +50,7 @@
                         <!-- Comments section-->
 
                         <section class="mb-5">
-                            <comment-component :comment_list="{{$comments}}"></comment-component>
+                            <comment-component :post_comments="{{$comments}}"></comment-component>
                         </section>
 
                     </div>

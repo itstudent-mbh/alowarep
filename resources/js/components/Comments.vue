@@ -2,7 +2,7 @@
     <div>
         <Teleport to="body">
             <!-- use the modal component, pass in the prop -->
-            <modal :show="showModal" :reply_to_id="reply_to_id" :reply_to="reply_to" @close="showModal = false">
+            <modal :show="showModal" :reply_to_id="reply_to_id" :reply_to="reply_to" @addreply="refreshList" @close="showModal = false">
 
             </modal>
         </Teleport>
@@ -52,7 +52,6 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -64,9 +63,7 @@
 import Modal from './ReplyModal.vue'
 
         export default {
-        props: {
-            comment_list : Array
-        },
+        props: ['post_comments'],
         components: {
             Modal
         },
@@ -76,8 +73,8 @@ import Modal from './ReplyModal.vue'
             reply_to: '',
             reply_to_id: null,
             user_name:'',
-            comment:''
-
+            comment:'',
+            comment_list: this.post_comments
             }
         },
         methods:{
@@ -86,8 +83,23 @@ import Modal from './ReplyModal.vue'
                 this.reply_to = user_name;
                 this.reply_to_id = comment_id;
             },
-            sendComment(){
+            sendComment(reply_to_id = null){
                 if(this.user_name == '' || this.comment == '') return false;
+                axios.post('/post/comment',{
+                    post_id : 1 ,
+                    user_name: this.user_name,
+                    comment: this.comment,
+                    post_comment_id: reply_to_id
+                })
+                .then((response) => {
+                    this.comment_list = response.data;
+                    this.user_name='';
+                    this.comment='';})
+                .catch((error) => console.log(error));
+            },
+            refreshList(newlist){
+                this.comment_list = newlist;
+                this.showModal = false
             }
 
         }
