@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PostComment;
+use Egulias\EmailValidator\Warning\Comment;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
     public function index($id)
     {
-        return view('post');
+        $comments = PostComment::where('post_id',$id)->where('post_comment_id',null)->with(['childs'])->get();
+        return view('post' , compact('comments'));
     }
 }
