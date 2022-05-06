@@ -48,9 +48,11 @@
                             </section>
                         </article>
                         <!-- Comments section-->
+
                         <section class="mb-5">
                             <comment-component :comment_list="{{$comments}}"></comment-component>
                         </section>
+
                     </div>
                     <!-- Side widgets-->
                     <div class="col-lg-4">
