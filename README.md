@@ -27,3 +27,14 @@ Start an empty repository in GitHub, commit the base Laravel to the master branc
 Don’t make the project complicated; there is no need for user login, live broadcasting, and notifications.
 
 You don’t need to create a User and Post model.
+
+## install and run Project
+
+1. run composer install
+2. config .env and mysql connection
+3. run php artian serve 
+4. run php artisan migrate
+5. run npm install
+6. run npm run watch
+7. open http://127.0.0.1:8000/post/1 in your browser 
+
