@@ -4,11 +4,21 @@ export default {
     data() {
         return {
         reply_user_name: '',
-        reply_comment: ''
+        reply_comment: '',
+        showReplyUserNameError: false,
+        showReplyCommentError: false
         }
     },
     methods:{
         sendComment(reply_to_id){
+            if(this.reply_user_name == '') {
+                    this.showReplyUserNameError=true
+                    return false;
+                }
+                if( this.reply_comment == '') {
+                    this.showReplyCommentError=true
+                    return false;
+                }
             if(this.reply_user_name == '' || this.reply_comment == '') return false;
             this.$emit('addreply',{
                 user_name: this.reply_user_name,
@@ -17,6 +27,8 @@ export default {
             });
             this.reply_user_name='';
             this.reply_comment='';
+            this.showReplyUserNameError= false;
+            this.showReplyCommentError= false;
         }
     },
     created() {
@@ -39,11 +51,11 @@ export default {
                 <h3 style="margin-bottom: 20px;">Leave reply to <Strong>{{reply_to}}</Strong></h3>
                 <form>
                     <div class="form-group">
-                        <label for="user_name">Your Name</label>
+                        <label for="user_name">Your Name</label> <span class="text-danger" v-if="showReplyUserNameError"> is required</span>
                         <input type="text" class="form-control" id="user_name" placeholder="Enter Your Name" v-model="reply_user_name">
                     </div>
                     <div class="form-group">
-                        <label for="comment">Comment</label>
+                        <label for="comment">Comment</label> <span class="text-danger" v-if="showReplyCommentError"> is required</span>
                         <textarea type="password" class="form-control" id="comment" placeholder="Enter your comments..." v-model="reply_comment" ></textarea>
                     </div>
                     <div class="form-group">

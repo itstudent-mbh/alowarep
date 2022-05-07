@@ -5328,6 +5328,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -5338,6 +5341,8 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       showModal: false,
+      showUserNameError: false,
+      showCommentError: false,
       reply_to: '',
       reply_to_id: null,
       user_name: '',
@@ -5355,7 +5360,17 @@ __webpack_require__.r(__webpack_exports__);
       var _this = this;
 
       var reply_to_id = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-      if (this.user_name == '' || this.comment == '') return false;
+
+      if (this.user_name == '') {
+        this.showUserNameError = true;
+        return false;
+      }
+
+      if (this.comment == '') {
+        this.showCommentError = true;
+        return false;
+      }
+
       axios__WEBPACK_IMPORTED_MODULE_0___default().post('/post/comment', {
         user_name: this.user_name,
         comment: this.comment,
@@ -5364,8 +5379,14 @@ __webpack_require__.r(__webpack_exports__);
         if (Array.isArray(response.data)) _this.comment_list = response.data;else _this.comment_list.unshift(response.data);
         _this.user_name = '';
         _this.comment = '';
+        _this.showUserNameError = false;
+        _this.showCommentError = false;
       })["catch"](function (error) {
-        return console.log(error);
+        if (error.response.data['errors']) {
+          var errors = error.response.data['errors'];
+          if (errors.hasOwnProperty('user_name')) _this.showUserNameError = true;
+          if (errors.hasOwnProperty('comment')) _this.showCommentError = true;
+        }
       });
     },
     refreshList: function refreshList(newReplay) {
@@ -5430,11 +5451,23 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       reply_user_name: '',
-      reply_comment: ''
+      reply_comment: '',
+      showReplyUserNameError: false,
+      showReplyCommentError: false
     };
   },
   methods: {
     sendComment: function sendComment(reply_to_id) {
+      if (this.reply_user_name == '') {
+        this.showReplyUserNameError = true;
+        return false;
+      }
+
+      if (this.reply_comment == '') {
+        this.showReplyCommentError = true;
+        return false;
+      }
+
       if (this.reply_user_name == '' || this.reply_comment == '') return false;
       this.$emit('addreply', {
         user_name: this.reply_user_name,
@@ -5443,6 +5476,8 @@ __webpack_require__.r(__webpack_exports__);
       });
       this.reply_user_name = '';
       this.reply_comment = '';
+      this.showReplyUserNameError = false;
+      this.showReplyCommentError = false;
     }
   },
   created: function created() {
@@ -28665,47 +28700,17 @@ var render = function () {
           { staticClass: "card-body" },
           [
             _c("div", { staticClass: "form-row" }, [
-              _c("div", { staticClass: "form-group" }, [
-                _c("label", { attrs: { for: "user_name" } }, [
-                  _vm._v("Comment"),
-                ]),
-                _vm._v(" "),
-                _c("textarea", {
-                  directives: [
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.comment,
-                      expression: "comment",
-                    },
-                  ],
-                  staticClass: "form-control",
-                  attrs: {
-                    id: "user_name",
-                    name: "user_name",
-                    rows: "3",
-                    placeholder: "Join the discussion and leave a comment!",
-                  },
-                  domProps: { value: _vm.comment },
-                  on: {
-                    input: function ($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.comment = $event.target.value
-                    },
-                  },
-                }),
-              ]),
-            ]),
-            _vm._v(" "),
-            _c("div", { staticClass: "form-row" }, [
               _c("div", { staticClass: "col-auto" }, [
                 _c(
                   "label",
                   { staticClass: "sr-only", attrs: { for: "user_name" } },
                   [_vm._v("Name")]
                 ),
+                _vm.showUserNameError
+                  ? _c("span", { staticClass: "text-danger" }, [
+                      _vm._v(" is required"),
+                    ])
+                  : _vm._e(),
                 _vm._v(" "),
                 _c("input", {
                   directives: [
@@ -28716,7 +28721,7 @@ var render = function () {
                       expression: "user_name",
                     },
                   ],
-                  staticClass: "form-control mb-2",
+                  staticClass: "form-control mb-2 has-error",
                   attrs: {
                     type: "text",
                     name: "user_name",
@@ -28730,6 +28735,47 @@ var render = function () {
                         return
                       }
                       _vm.user_name = $event.target.value
+                    },
+                  },
+                }),
+              ]),
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "form-row" }, [
+              _c("div", { staticClass: "form-group" }, [
+                _c("label", { attrs: { for: "user_name" } }, [
+                  _vm._v("Comment"),
+                ]),
+                _vm._v(" "),
+                _vm.showCommentError
+                  ? _c("span", { staticClass: "text-danger" }, [
+                      _vm._v(" is required"),
+                    ])
+                  : _vm._e(),
+                _vm._v(" "),
+                _c("textarea", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.comment,
+                      expression: "comment",
+                    },
+                  ],
+                  staticClass: "form-control mb-2",
+                  attrs: {
+                    id: "user_name",
+                    name: "user_name",
+                    rows: "3",
+                    placeholder: "Join the discussion and leave a comment!",
+                  },
+                  domProps: { value: _vm.comment },
+                  on: {
+                    input: function ($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.comment = $event.target.value
                     },
                   },
                 }),
@@ -29018,6 +29064,12 @@ var render = function () {
                             _vm._v("Your Name"),
                           ]),
                           _vm._v(" "),
+                          _vm.showReplyUserNameError
+                            ? _c("span", { staticClass: "text-danger" }, [
+                                _vm._v(" is required"),
+                              ])
+                            : _vm._e(),
+                          _vm._v(" "),
                           _c("input", {
                             directives: [
                               {
@@ -29049,6 +29101,12 @@ var render = function () {
                           _c("label", { attrs: { for: "comment" } }, [
                             _vm._v("Comment"),
                           ]),
+                          _vm._v(" "),
+                          _vm.showReplyCommentError
+                            ? _c("span", { staticClass: "text-danger" }, [
+                                _vm._v(" is required"),
+                              ])
+                            : _vm._e(),
                           _vm._v(" "),
                           _c("textarea", {
                             directives: [

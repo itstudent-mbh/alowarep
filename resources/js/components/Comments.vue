@@ -11,21 +11,24 @@
             <div class="card-body">
                 <!-- Comment form-->
 
-                <div class="form-row">
-                    <div class="form-group">
-                    <label for="user_name">Comment</label>
-                    <textarea class="form-control" id="user_name" name="user_name" rows="3" placeholder="Join the discussion and leave a comment!" v-model="comment"></textarea>
-                    </div>
-                </div>
+
                 <div class="form-row">
                     <div class="col-auto">
-                        <label class="sr-only" for="user_name">Name</label>
-                        <input type="text" class="form-control mb-2" name="user_name" id="user_name" placeholder="Enter your name..." v-model="user_name">
+                        <label class="sr-only" for="user_name">Name</label><span class="text-danger" v-if="showUserNameError"> is required</span>
+                        <input type="text" class="form-control mb-2 has-error" name="user_name" id="user_name" placeholder="Enter your name..." v-model="user_name">
+                    </div>
+
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                    <label for="user_name">Comment</label> <span class="text-danger" v-if="showCommentError"> is required</span>
+                    <textarea class="form-control mb-2" id="user_name" name="user_name" rows="3" placeholder="Join the discussion and leave a comment!" v-model="comment"></textarea>
                     </div>
                     <div class="col-auto" style="text-align:right;">
                         <button @click="sendComment()" class="w-25 btn btn-primary mb-2">Send</button>
                     </div>
                 </div>
+
 
 
 
@@ -60,7 +63,7 @@
 <script>
 
     import axios from 'axios';
-import Modal from './ReplyModal.vue'
+    import Modal from './ReplyModal.vue'
 
         export default {
         props: ['post_comments'],
@@ -70,6 +73,8 @@ import Modal from './ReplyModal.vue'
         data() {
             return {
             showModal: false,
+            showUserNameError:false,
+            showCommentError:false,
             reply_to: '',
             reply_to_id: null,
             user_name:'',
@@ -84,7 +89,14 @@ import Modal from './ReplyModal.vue'
                 this.reply_to_id = comment_id;
             },
             sendComment(reply_to_id = null){
-                if(this.user_name == '' || this.comment == '') return false;
+                if(this.user_name == '') {
+                    this.showUserNameError=true
+                    return false;
+                }
+                if( this.comment == '') {
+                    this.showCommentError=true
+                    return false;
+                }
                 axios.post('/post/comment',{
                     user_name: this.user_name,
                     comment: this.comment,
@@ -97,8 +109,17 @@ import Modal from './ReplyModal.vue'
                         this.comment_list.unshift(response.data);
 
                     this.user_name='';
-                    this.comment='';})
-                .catch((error) => console.log(error));
+                    this.comment='';
+                    this.showUserNameError=false;
+                    this.showCommentError=false;
+                    })
+                .catch((error) => {
+                    if(error.response.data['errors']){
+                        let errors = error.response.data['errors'];
+                        if(errors.hasOwnProperty('user_name')) this.showUserNameError=true;
+                        if(errors.hasOwnProperty('comment')) this.showCommentError=true;
+                    }
+                });
             },
             refreshList(newReplay){
                 this.user_name=newReplay.user_name;
