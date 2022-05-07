@@ -86,19 +86,24 @@ import Modal from './ReplyModal.vue'
             sendComment(reply_to_id = null){
                 if(this.user_name == '' || this.comment == '') return false;
                 axios.post('/post/comment',{
-                    post_id : 1 ,
                     user_name: this.user_name,
                     comment: this.comment,
                     post_comment_id: reply_to_id
                 })
                 .then((response) => {
-                    this.comment_list = response.data;
+                    if(Array.isArray(response.data))
+                        this.comment_list= response.data;
+                    else
+                        this.comment_list.unshift(response.data);
+
                     this.user_name='';
                     this.comment='';})
                 .catch((error) => console.log(error));
             },
-            refreshList(newlist){
-                this.comment_list = newlist;
+            refreshList(newReplay){
+                this.user_name=newReplay.user_name;
+                this.comment=newReplay.comment;
+                this.sendComment(newReplay.post_comment_id)
                 this.showModal = false
             }
 

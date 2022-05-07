@@ -1,6 +1,4 @@
 <script>
-import { text } from "body-parser";
-
 export default {
     props: ['show','reply_to','reply_to_id'],
     data() {
@@ -10,18 +8,24 @@ export default {
         }
     },
     methods:{
-        sendComment(reply_to_id = null){
+        sendComment(reply_to_id){
             if(this.reply_user_name == '' || this.reply_comment == '') return false;
-            axios.post('/post/comment',{
-                post_id : 1 ,
+            this.$emit('addreply',{
                 user_name: this.reply_user_name,
                 comment: this.reply_comment,
                 post_comment_id: reply_to_id
-            })
-            .then((response) => {this.$emit('addreply',response.data); this.reply_user_name=''; this.reply_comment=''})
-            .catch((error) => console.log(error));
+            });
+            this.reply_user_name='';
+            this.reply_comment='';
         }
-    }
+    },
+    created() {
+        window.addEventListener('keydown', (e) => {
+            if (e.key == 'Escape') {
+                this.$emit('close');
+            }
+        });
+    },
 }
 </script>
 
@@ -42,7 +46,6 @@ export default {
                         <label for="comment">Comment</label>
                         <textarea type="password" class="form-control" id="comment" placeholder="Enter your comments..." v-model="reply_comment" ></textarea>
                     </div>
-                    <input type="hidden" class="form-control" id="post_comment_id" :value="reply_to_id" >
                     <div class="form-group">
                         <input style="margin:10px" type="button"  class="btn btn-secondary modal-default-button"  @click="$emit('close')" value="Cancel">
                         <input style="margin:10px" type="button"  class="btn btn-primary modal-default-button"  @click="sendComment(reply_to_id)" value="Send">
@@ -57,7 +60,7 @@ export default {
   </Transition>
 </template>
 
-<style>
+<style scoped>
 .modal-mask {
   position: fixed;
   z-index: 9998;
