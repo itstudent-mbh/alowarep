@@ -22,6 +22,6 @@ class PostComment extends Model
 
     // get comment replies
     public function childs(){
-        return $this->hasMany(PostComment::class)->with(['childs']);
+        return $this->hasMany(PostComment::class)->orderBy('created_at', 'desc')->with(['childs']);
     }
 }

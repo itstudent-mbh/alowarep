@@ -1,27 +1,43 @@
 <script>
-import { text } from "body-parser";
-
 export default {
     props: ['show','reply_to','reply_to_id'],
     data() {
         return {
         reply_user_name: '',
-        reply_comment: ''
+        reply_comment: '',
+        showReplyUserNameError: false,
+        showReplyCommentError: false
         }
     },
     methods:{
-        sendComment(reply_to_id = null){
+        sendComment(reply_to_id){
+            if(this.reply_user_name == '') {
+                    this.showReplyUserNameError=true
+                    return false;
+                }
+                if( this.reply_comment == '') {
+                    this.showReplyCommentError=true
+                    return false;
+                }
             if(this.reply_user_name == '' || this.reply_comment == '') return false;
-            axios.post('/post/comment',{
-                post_id : 1 ,
+            this.$emit('addreply',{
                 user_name: this.reply_user_name,
                 comment: this.reply_comment,
                 post_comment_id: reply_to_id
-            })
-            .then((response) => {this.$emit('addreply',response.data); this.reply_user_name=''; this.reply_comment=''})
-            .catch((error) => console.log(error));
+            });
+            this.reply_user_name='';
+            this.reply_comment='';
+            this.showReplyUserNameError= false;
+            this.showReplyCommentError= false;
         }
-    }
+    },
+    created() {
+        window.addEventListener('keydown', (e) => {
+            if (e.key == 'Escape') {
+                this.$emit('close');
+            }
+        });
+    },
 }
 </script>
 
@@ -35,14 +51,13 @@ export default {
                 <h3 style="margin-bottom: 20px;">Leave reply to <Strong>{{reply_to}}</Strong></h3>
                 <form>
                     <div class="form-group">
-                        <label for="user_name">Your Name</label>
+                        <label for="user_name">Your Name</label> <span class="text-danger" v-if="showReplyUserNameError"> is required</span>
                         <input type="text" class="form-control" id="user_name" placeholder="Enter Your Name" v-model="reply_user_name">
                     </div>
                     <div class="form-group">
-                        <label for="comment">Comment</label>
+                        <label for="comment">Comment</label> <span class="text-danger" v-if="showReplyCommentError"> is required</span>
                         <textarea type="password" class="form-control" id="comment" placeholder="Enter your comments..." v-model="reply_comment" ></textarea>
                     </div>
-                    <input type="hidden" class="form-control" id="post_comment_id" :value="reply_to_id" >
                     <div class="form-group">
                         <input style="margin:10px" type="button"  class="btn btn-secondary modal-default-button"  @click="$emit('close')" value="Cancel">
                         <input style="margin:10px" type="button"  class="btn btn-primary modal-default-button"  @click="sendComment(reply_to_id)" value="Send">
@@ -57,7 +72,7 @@ export default {
   </Transition>
 </template>
 
-<style>
+<style scoped>
 .modal-mask {
   position: fixed;
   z-index: 9998;
