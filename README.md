@@ -35,6 +35,5 @@ You don’t need to create a User and Post model.
 3. run php artian serve 
 4. run php artisan migrate
 5. run npm install
-6. run npm run watch
-7. open http://127.0.0.1:8000/post/1 in your browser 
+6. open http://127.0.0.1:8000/ in your browser 
 
